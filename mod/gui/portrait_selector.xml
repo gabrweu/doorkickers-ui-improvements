@@ -1,0 +1,277 @@
+<!--
+Portrait Selector: a button on the trooper's large portrait (Customization screen) that opens a grid of every portrait.
+
+This is a separate GUI file (the game loads every .xml in a mod's gui/ folder) so the mod doesn't replace
+customization.xml and stays compatible with other UI mods. The dk2_portrait_selector plugin moves #dk2ml_ps_open onto
+the screen's #portrait and #dk2ml_ps_picker into the screen itself (which captures input) at runtime. Without the plugin
+both stay hidden.
+
+type="Callback" actions call into the plugin; their targets must still name existing items (the XML loader insists).
+One screen of cells (and group headers) is cloned from the templates into #dk2ml_ps_grid by the plugin, which
+lays them out and re-skins them as the list scrolls.
+Item names all start with #dk2ml_ps_ so they're unique across the whole GUI.
+-->
+<GUIItems>
+	<!-- origin is relative to the large portrait (536x464): bottom right corner, above the rank/XP panel (which covers
+		 the bottom 96 px of the portrait) and clear of the arrows and class icon -->
+	<Item name="#dk2ml_ps_open" align="rb" origin="-15 106" sizeX="64" sizeY="64" hidden="true">
+		<Button name="#dk2ml_ps_open_btn" tooltip="Choose portrait">
+			<RenderObject2D texture="data/textures/gui/dk2ml_ps_open_normal.dds" blendMode="none"/>
+			<OnHover>
+				<RenderObject2D texture="data/textures/gui/dk2ml_ps_open_hover.dds" blendMode="none"/>
+			</OnHover>
+			<OnClick>
+				<RenderObject2D texture="data/textures/gui/dk2ml_ps_open_hover.dds" scaleX="0.95" scaleY="0.95" blendMode="none"/>
+				<Action type="PlaySound" target="gui_customize_equip"/>
+				<Action type="Callback" target="#dk2ml_ps_open"/>
+			</OnClick>
+		</Button>
+	</Item>
+
+	<Item name="#dk2ml_ps_picker" hidden="true">
+		<!-- clicking outside the box closes the picker (and nothing underneath gets the click) -->
+		<Item origin="0 0" sizeX="9999" sizeY="9999">
+			<OnCursorDown>
+				<Action type="Hide" target="#dk2ml_ps_picker"/>
+			</OnCursorDown>
+			<OnRClickDown>
+				<Action type="Hide" target="#dk2ml_ps_picker"/>
+			</OnRClickDown>
+		</Item>
+		<StaticImage>
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="9999" sizeY="9999" color="0c0b0bb0"/>
+		</StaticImage>
+
+		<!-- the panel's background: keeps clicks on empty panel space from reaching the catcher above.
+			 It must not contain the controls: a stealFocus item under the cursor takes the click itself and its
+			 children are never hit-tested (stock screens do the same, background first, controls as later siblings) -->
+		<StaticImage stealFocus="true">
+			<RenderObject2D texture="data/textures/gui/menu_darkbrown_background.tga" sizeX="1106" sizeY="1380" color="fffffff0"/>
+		</StaticImage>
+
+		<Item name="#dk2ml_ps_box" sizeX="1106" sizeY="1380">
+
+			<!-- the plugin sets "CHOOSE PORTRAIT: <trooper name>" -->
+			<StaticText name="#dk2ml_ps_title" align="t" origin="0 -40" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" font="header_2" textColor="f97b03"/>
+
+			<!-- button row, flush with the grid edges (grid: 1000 wide in the 1106 box, so its edges are 53 px in):
+			     left: unit filter (one active); right: hide used (toggle), random unused portrait (action) -->
+			<Button name="#dk2ml_ps_f_unit" align="lt" origin="53 -120" tooltip="Portraits of this trooper's unit (and class), like the arrows">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="605a4f80"/>
+				<ButtonText text="THIS UNIT" font="header_4" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="f0e3cc"/>
+					<ButtonText text="THIS UNIT" font="header_4" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="f0e3cc"/>
+					<ButtonText text="THIS UNIT" font="header_4" textColor="211e1d"/>
+					<Action type="Callback" target="#dk2ml_ps_f_unit"/>
+				</OnClick>
+				<StaticImage name="#dk2ml_ps_f_unit_on" align="b" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="6" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_ps_f_all" align="lt" origin="245 -120" tooltip="Portraits of every unit, including mods">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="605a4f80"/>
+				<ButtonText text="ALL UNITS" font="header_4" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="f0e3cc"/>
+					<ButtonText text="ALL UNITS" font="header_4" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="f0e3cc"/>
+					<ButtonText text="ALL UNITS" font="header_4" textColor="211e1d"/>
+					<Action type="Callback" target="#dk2ml_ps_f_all"/>
+				</OnClick>
+				<StaticImage name="#dk2ml_ps_f_all_on" align="b" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="6" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_ps_f_hideused" align="rt" origin="-245 -120" tooltip="Hide portraits other troopers in the roster already wear">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="605a4f80"/>
+				<ButtonText text="HIDE USED" font="header_4" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="f0e3cc"/>
+					<ButtonText text="HIDE USED" font="header_4" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="f0e3cc"/>
+					<ButtonText text="HIDE USED" font="header_4" textColor="211e1d"/>
+					<Action type="Callback" target="#dk2ml_ps_f_hideused"/>
+				</OnClick>
+				<StaticImage name="#dk2ml_ps_f_hideused_on" align="b" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="6" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_ps_random" align="rt" origin="-53 -120" tooltip="Give this trooper a random portrait from the list that nobody wears">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="f97b03b0"/>
+				<ButtonText text="RANDOM" font="header_4" textColor="211e1d"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="f97b03"/>
+					<ButtonText text="RANDOM" font="header_4" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="180" sizeY="56" color="f0e3cc"/>
+					<ButtonText text="RANDOM" font="header_4" textColor="211e1d"/>
+					<Action type="Callback" target="#dk2ml_ps_random"/>
+				</OnClick>
+			</Button>
+
+			<!-- status, centered between the button groups; set by the plugin ("112 PORTRAITS" / "9 IN USE" or "9 HIDDEN") -->
+			<StaticText name="#dk2ml_ps_status_count" align="t" origin="0 -122" font="header_4" textColor="f0e3cc"
+				text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<StaticText name="#dk2ml_ps_status_used" align="t" origin="0 -152" font="paragraph_2" textColor="f97b03"
+				text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+
+			<!-- one grid cell: cloned per portrait by the plugin (kept outside the list, which lays out all its children) -->
+			<Button name="#dk2ml_ps_cell_template" hidden="true">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="88" sizeY="88" color="605a4f80"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="88" sizeY="88" color="f0e3cc"/>
+					<Action type="Callback" target="#dk2ml_ps_grid"/> <!-- shows the pop-up -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_ps_grid"/> <!-- hides it -->
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="88" sizeY="88" color="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_ps_grid"/>
+				</OnClick>
+				<OnScrollDown>
+					<Action type="Callback" target="#dk2ml_ps_grid"/>
+				</OnScrollDown>
+				<OnScrollUp>
+					<Action type="Callback" target="#dk2ml_ps_grid"/>
+				</OnScrollUp>
+
+				<!-- the trooper's current portrait -->
+				<StaticImage name="#dk2ml_ps_cell_sel" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="88" sizeY="88" color="f97b03"/>
+				</StaticImage>
+				<StaticImage name="#dk2ml_ps_cell_img">
+					<RenderObject2D texture="data/textures/portraits/who.dds"/>
+				</StaticImage>
+				<!-- worn by a squadmate: dims the portrait, with a small tag in the corner (the pop-up says who; keep
+					 the template without a tooltip) -->
+				<StaticImage name="#dk2ml_ps_cell_used" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="80" sizeY="80" color="0c0b0bb4"/>
+					<StaticImage align="rb" origin="-4 4">
+						<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="16" color="f0e3cc"/>
+					</StaticImage>
+				</StaticImage>
+				<!-- worn by someone in another squad: lighter dim, grey tag -->
+				<StaticImage name="#dk2ml_ps_cell_used_other" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="80" sizeY="80" color="0c0b0b70"/>
+					<StaticImage align="rb" origin="-4 4">
+						<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="16" color="7f7f7f"/>
+					</StaticImage>
+				</StaticImage>
+			</Button>
+
+			<!-- a group header row (All units groups portraits by unit): cloned once per visible row slot. The
+				 plugin sets the text, which can't get longer than this placeholder -->
+			<Item name="#dk2ml_ps_header_template" sizeX="1000" sizeY="88" hidden="true">
+				<OnScrollDown>
+					<Action type="Callback" target="#dk2ml_ps_grid"/>
+				</OnScrollDown>
+				<OnScrollUp>
+					<Action type="Callback" target="#dk2ml_ps_grid"/>
+				</OnScrollUp>
+				<StaticImage align="b" origin="0 14">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="980" sizeY="3" color="f97b03"/>
+				</StaticImage>
+				<StaticText name="#dk2ml_ps_header_text" align="lb" origin="10 22" font="header_3" textColor="f97b03"
+					text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			</Item>
+
+			<!-- hover pop-up for a cell: the large portrait (the _large texture, drawn at 60%: SetImageAndImplicitSize
+				 replaces the texture and size but keeps the scale), the file name, a CURRENT badge and who in the roster wears it. The
+				 plugin moves it into the grid and places it beside the hovered cell. The texts can't get longer than
+				 their placeholders -->
+			<Item name="#dk2ml_ps_preview" sizeX="360" sizeY="470" hidden="true">
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="364" sizeY="474" color="f97b03"/>
+				</StaticImage>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="360" sizeY="470" color="0c0b0bf0"/>
+				</StaticImage>
+				<!-- the image covers about 16..294 px from the top; the texts are top-anchored below it, so the "Used by"
+					 list can wrap downwards -->
+				<StaticImage name="#dk2ml_ps_preview_img" origin="0 80">
+					<RenderObject2D texture="data/textures/portraits/who.dds" scaleX="0.6" scaleY="0.6" blendMode="none"/>
+				</StaticImage>
+				<!-- used instead when a portrait has no _large version: the 80x80 cell texture at 3x -->
+				<StaticImage name="#dk2ml_ps_preview_img_small" origin="0 80" hidden="true">
+					<RenderObject2D texture="data/textures/portraits/who.dds" scaleX="3" scaleY="3"/>
+				</StaticImage>
+				<!-- the trooper's own portrait -->
+				<Item name="#dk2ml_ps_preview_current" align="lt" origin="16 -16" sizeX="150" sizeY="30" hidden="true">
+					<StaticImage>
+						<RenderObject2D texture="data/textures/gui/square.tga" sizeX="150" sizeY="30" color="f97b03"/>
+					</StaticImage>
+					<StaticText text="CURRENT" font="header_4" textColor="211e1d"/>
+				</Item>
+				<StaticText name="#dk2ml_ps_preview_name" align="t" origin="0 -306" font="header_4" textColor="f0e3cc"
+					text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticText name="#dk2ml_ps_preview_used" align="t" origin="0 -340" sizeX="330" wordWrap="true" font="paragraph_2"
+					textColor="f97b03" hidden="true"
+					text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			</Item>
+
+			<!-- the visible rows; the mouse wheel over it (or over a cell or header) scrolls -->
+			<Item name="#dk2ml_ps_grid" align="t" origin="0 -200" sizeX="1000" sizeY="1060">
+				<OnScrollDown>
+					<Action type="Callback" target="#dk2ml_ps_grid"/>
+				</OnScrollDown>
+				<OnScrollUp>
+					<Action type="Callback" target="#dk2ml_ps_grid"/>
+				</OnScrollUp>
+			</Item>
+
+			<!-- scrollbar, right of the grid; the plugin moves the thumb and hides both when everything fits -->
+			<StaticImage name="#dk2ml_ps_track" align="t" origin="525 -200" hidden="true">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="1060" color="f97b0320"/>
+				<OnScrollDown>
+					<Action type="Callback" target="#dk2ml_ps_grid"/>
+				</OnScrollDown>
+				<OnScrollUp>
+					<Action type="Callback" target="#dk2ml_ps_grid"/>
+				</OnScrollUp>
+				<Button name="#dk2ml_ps_thumb">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="80" color="f97b0380"/>
+					<OnHover>
+						<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="80" color="f97b03"/>
+					</OnHover>
+					<OnClick>
+						<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="80" color="f97b03"/>
+					</OnClick>
+					<OnCursorDown>
+						<Action type="Callback" target="#dk2ml_ps_thumb"/>
+					</OnCursorDown>
+					<OnDrag>
+						<Action type="Callback" target="#dk2ml_ps_thumb"/>
+					</OnDrag>
+					<OnScrollDown>
+						<Action type="Callback" target="#dk2ml_ps_grid"/>
+					</OnScrollDown>
+					<OnScrollUp>
+						<Action type="Callback" target="#dk2ml_ps_grid"/>
+					</OnScrollUp>
+				</Button>
+			</StaticImage>
+
+			<Button align="lb" origin="48 40">
+				<ButtonText text="@menu_generic_back" align="l" font="header_2" textColor="f0e3cc"/>
+				<OnHover>
+					<ButtonText text="@menu_generic_back" align="l" font="header_2" textColor="211e1d"/>
+					<RenderObject2D texture="data/textures/gui/button_hover_01.tga" align="l" color="f0e3cc"/>
+				</OnHover>
+				<OnClick>
+					<Action type="Hide" target="#dk2ml_ps_picker"/>
+				</OnClick>
+			</Button>
+		</Item>
+	</Item>
+</GUIItems>

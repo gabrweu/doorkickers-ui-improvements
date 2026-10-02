@@ -1,0 +1,41 @@
+<!--
+Operator tooltip: a row with the trooper's Support Gear 2 (lockpick) and Support Gear 3 (crowbar, halligan, feet of
+steel, ...) under the helmet/armor panel of the in-mission / deploy hover tooltip (HUD_Human_Tooltip), with icons and
+names. A port of the HUD Support Gear mod, without replacing hud.xml: the plugin moves #dk2ml_tt_gear into whichever
+hud.xml's #InvArmorHelmet (stock, Deluke UI, Tacticool UI) right before the game fills the tooltip.
+
+The game fills any item named after an inventory slot (Inventory::GetNameForEnum: SupportGear2, SupportGear3) that it
+finds in the tooltip: it hides it, sets its #Icon texture, and shows it when the trooper has something in that slot.
+The cells sit in a plain (not slot-named) wrapper, because the game lines up slot-named direct children of
+#InvArmorHelmet in a 160 px row. The plugin sets #dk2ml_tt_name (with the tooltip's own text color), fits the icon
+into its circle, and moves the sections below the panel down by the row's height while the row shows.
+The row's background is on the wrapper (full width, so a single filled slot leaves no gap); the plugin shows the
+row only while at least one of its slots is filled.
+-->
+<GUIItems>
+	<!-- origin: relative to #InvArmorHelmet's center (320x120): the row's center 60 + 75 px below it; the circle at the top of each cell, two lines of name under it -->
+	<StaticImage name="#dk2ml_tt_gear" origin="0 -135" hidden="true">
+		<!-- one full-width background, like the panel above (the plugin hides the row when neither slot is filled) -->
+		<RenderObject2D texture="data/textures/gui/square.tga" sizeX="320" sizeY="150" color="211e1dfa" blendMode="normal"/>
+		<Item name="SupportGear2" origin="-80 0" sizeX="160" sizeY="150">
+			<StaticImage origin="0 27">
+				<RenderObject2D texture="data/textures/gui/tooltip/hud_tooltip_bgcircle.tga" color="080808c8" blendMode="normal" sizeX="88" sizeY="88"/>
+			</StaticImage>
+			<StaticImage name="#Icon" origin="0 27">
+				<RenderObject2D texture="data/models/equipment/lockpick_ui.dds" scaleX="0.45" scaleY="0.45"/>
+			</StaticImage>
+			<StaticText name="#dk2ml_tt_name" align="t" origin="0 -94" sizeX="150" wordWrap="true" font="paragraph_3" textColor="f0e3cc"
+				text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+		</Item>
+		<Item name="SupportGear3" origin="80 0" sizeX="160" sizeY="150">
+			<StaticImage origin="0 27">
+				<RenderObject2D texture="data/textures/gui/tooltip/hud_tooltip_bgcircle.tga" color="080808c8" blendMode="normal" sizeX="88" sizeY="88"/>
+			</StaticImage>
+			<StaticImage name="#Icon" origin="0 27">
+				<RenderObject2D texture="data/models/equipment/crowbar_ui.dds" scaleX="0.45" scaleY="0.45"/>
+			</StaticImage>
+			<StaticText name="#dk2ml_tt_name" align="t" origin="0 -94" sizeX="150" wordWrap="true" font="paragraph_3" textColor="f0e3cc"
+				text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+		</Item>
+	</StaticImage>
+</GUIItems>
