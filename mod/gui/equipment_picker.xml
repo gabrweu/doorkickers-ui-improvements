@@ -195,6 +195,153 @@ template gives more columns (shrink the icon's scale with it).
 			</StaticImage>
 		</Button>
 
+		<!-- icon-only weapon cells, for the "Weapons per row" setting at 3 and 4 (2 uses #dk2ml_ep_cell_template above):
+		     the same children and actions, minus the name (the details panel shows it on hover), the icon centred. The
+		     plugin fits 3 / 4 columns because of these widths -->
+		<Button name="#dk2ml_ep_cell3_template" hidden="true">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="176" sizeY="84" color="605a4f80"/>
+			<OnHover>
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="176" sizeY="84" color="8f8676b0"/>
+				<Action type="Callback" target="#dk2ml_ep_grid"/> <!-- shows #equipment_details_panel -->
+				<Action type="TriggerEvent" target="GUI_GAME_CUSTOMIZE_HOVER_LIST_ITEM"/>
+			</OnHover>
+			<OnHoverEnd>
+				<Action type="TriggerEvent" target="GUI_GAME_CUSTOMIZE_HOVER_LIST_ITEM_END"/>
+			</OnHoverEnd>
+			<OnClick>
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="176" sizeY="84" color="f97b03b0"/>
+				<Action type="TriggerEvent" target="GUI_GAME_CUSTOMIZE_ITEM_TRY_EQUIP"/>
+				<Action type="PlaySound" target="gui_customize_equip"/>
+			</OnClick>
+			<OnScrollDown>
+				<Action type="Callback" target="#dk2ml_ep_grid"/>
+			</OnScrollDown>
+			<OnScrollUp>
+				<Action type="Callback" target="#dk2ml_ep_grid"/>
+			</OnScrollUp>
+
+			<StaticImage name="#dk2ml_ep_cell_iconbox">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="164" sizeY="64" color="00000000"/>
+				<StaticImage name="#dk2ml_ep_cell_img">
+					<RenderObject2D texture="data/models/weapons/m4_ui.dds" scaleX="0.75" scaleY="0.75"/>
+				</StaticImage>
+			</StaticImage>
+			<StaticText name="#id" font="paragraph_3" hidden="true"
+				text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+
+			<StaticImage name="#dk2ml_ep_cell_locked" hidden="true">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="176" sizeY="84" color="0c0b0b90"/>
+				<StaticImage align="rt" origin="-2 -2">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="60" sizeY="29" color="00000000"/>
+					<StaticImage name="#dk2ml_ep_cell_stars" hidden="true">
+						<RenderObject2D texture="data/textures/gui/customization/stars_ribbon_normal.tga" scaleX="0.6" scaleY="0.6"/>
+					</StaticImage>
+					<StaticImage name="#dk2ml_ep_cell_bh" hidden="true">
+						<RenderObject2D texture="data/textures/gui/customization/bh_ribbon_normal.dds" scaleX="0.6" scaleY="0.6"/>
+					</StaticImage>
+					<StaticText name="#dk2ml_ep_cell_cost" align="r" origin="-5 0" font="header_5" textColor="f97b03" text="XXXXXXXX"/>
+				</StaticImage>
+			</StaticImage>
+
+			<StaticImage name="#dk2ml_ep_cell_used" hidden="true">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="176" sizeY="84" color="0c0b0b28"/>
+				<StaticImage align="rb" origin="-4 4">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="12" sizeY="12" color="f0e3cc"/>
+				</StaticImage>
+			</StaticImage>
+
+			<StaticImage name="#dk2ml_ep_cell_equipped" hidden="true">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="176" sizeY="84" color="00000000"/>
+				<StaticImage align="t">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="176" sizeY="3" color="f97b03"/>
+				</StaticImage>
+				<StaticImage align="b">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="176" sizeY="3" color="f97b03"/>
+				</StaticImage>
+				<StaticImage align="l">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="3" sizeY="84" color="f97b03"/>
+				</StaticImage>
+				<StaticImage align="r">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="3" sizeY="84" color="f97b03"/>
+				</StaticImage>
+				<StaticImage align="lt" origin="4 -4">
+					<RenderObject2D texture="data/textures/gui/customization/icon_status_equipped.tga" scaleX="0.6" scaleY="0.6"/>
+				</StaticImage>
+			</StaticImage>
+		</Button>
+
+		<Button name="#dk2ml_ep_cell4_template" hidden="true">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="128" sizeY="60" color="605a4f80"/>
+			<OnHover>
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="128" sizeY="60" color="8f8676b0"/>
+				<Action type="Callback" target="#dk2ml_ep_grid"/> <!-- shows #equipment_details_panel -->
+				<Action type="TriggerEvent" target="GUI_GAME_CUSTOMIZE_HOVER_LIST_ITEM"/>
+			</OnHover>
+			<OnHoverEnd>
+				<Action type="TriggerEvent" target="GUI_GAME_CUSTOMIZE_HOVER_LIST_ITEM_END"/>
+			</OnHoverEnd>
+			<OnClick>
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="128" sizeY="60" color="f97b03b0"/>
+				<Action type="TriggerEvent" target="GUI_GAME_CUSTOMIZE_ITEM_TRY_EQUIP"/>
+				<Action type="PlaySound" target="gui_customize_equip"/>
+			</OnClick>
+			<OnScrollDown>
+				<Action type="Callback" target="#dk2ml_ep_grid"/>
+			</OnScrollDown>
+			<OnScrollUp>
+				<Action type="Callback" target="#dk2ml_ep_grid"/>
+			</OnScrollUp>
+
+			<StaticImage name="#dk2ml_ep_cell_iconbox">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="120" sizeY="48" color="00000000"/>
+				<StaticImage name="#dk2ml_ep_cell_img">
+					<RenderObject2D texture="data/models/weapons/m4_ui.dds" scaleX="0.75" scaleY="0.75"/>
+				</StaticImage>
+			</StaticImage>
+			<StaticText name="#id" font="paragraph_3" hidden="true"
+				text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+
+			<StaticImage name="#dk2ml_ep_cell_locked" hidden="true">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="128" sizeY="60" color="0c0b0b90"/>
+				<StaticImage align="rt" origin="-2 -2">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="50" sizeY="24" color="00000000"/>
+					<StaticImage name="#dk2ml_ep_cell_stars" hidden="true">
+						<RenderObject2D texture="data/textures/gui/customization/stars_ribbon_normal.tga" scaleX="0.5" scaleY="0.5"/>
+					</StaticImage>
+					<StaticImage name="#dk2ml_ep_cell_bh" hidden="true">
+						<RenderObject2D texture="data/textures/gui/customization/bh_ribbon_normal.dds" scaleX="0.5" scaleY="0.5"/>
+					</StaticImage>
+					<StaticText name="#dk2ml_ep_cell_cost" align="r" origin="-5 0" font="header_5" textColor="f97b03" text="XXXXXXXX"/>
+				</StaticImage>
+			</StaticImage>
+
+			<StaticImage name="#dk2ml_ep_cell_used" hidden="true">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="128" sizeY="60" color="0c0b0b28"/>
+				<StaticImage align="rb" origin="-4 4">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="12" sizeY="12" color="f0e3cc"/>
+				</StaticImage>
+			</StaticImage>
+
+			<StaticImage name="#dk2ml_ep_cell_equipped" hidden="true">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="128" sizeY="60" color="00000000"/>
+				<StaticImage align="t">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="128" sizeY="3" color="f97b03"/>
+				</StaticImage>
+				<StaticImage align="b">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="128" sizeY="3" color="f97b03"/>
+				</StaticImage>
+				<StaticImage align="l">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="3" sizeY="60" color="f97b03"/>
+				</StaticImage>
+				<StaticImage align="r">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="3" sizeY="60" color="f97b03"/>
+				</StaticImage>
+				<StaticImage align="lt" origin="4 -4">
+					<RenderObject2D texture="data/textures/gui/customization/icon_status_equipped.tga" scaleX="0.5" scaleY="0.5"/>
+				</StaticImage>
+			</StaticImage>
+		</Button>
+
 		<!-- hover pop-up for a cell whose item squadmates have equipped: the item's icon, how many and who. The plugin moves it
 			 into the grid (above the cells), places it beside the hovered cell, sets the texts (which can't get longer than
 			 their placeholders) and sets its height to fit them, stretching the two backgrounds and re-placing the rest -->
@@ -215,7 +362,8 @@ template gives more columns (shrink the icon's scale with it).
 		</Item>
 
 		<!-- a group header row: cloned per header slot. The plugin sets "TITLE (count)", which can't get longer than
-			 the placeholder -->
+			 the placeholder. The -/+ button at its right end collapses / expands the group (the plugin shows the vertical bar
+			 while it's collapsed) -->
 		<Item name="#dk2ml_ep_header_template" sizeX="548" sizeY="34" hidden="true">
 			<OnScrollDown>
 				<Action type="Callback" target="#dk2ml_ep_grid"/>
@@ -228,6 +376,28 @@ template gives more columns (shrink the icon's scale with it).
 			</StaticImage>
 			<StaticText name="#dk2ml_ep_header_text" align="lb" origin="10 6" font="header_4" textColor="f97b03"
 				text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<Button name="#dk2ml_ep_header_toggle" align="rb" origin="-12 5">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="28" sizeY="26" color="605a4f80"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="28" sizeY="26" color="605a4fc0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="28" sizeY="26" color="f97b03b0"/>
+					<Action type="Callback" target="#dk2ml_ep_grid"/>
+				</OnClick>
+				<OnScrollDown>
+					<Action type="Callback" target="#dk2ml_ep_grid"/>
+				</OnScrollDown>
+				<OnScrollUp>
+					<Action type="Callback" target="#dk2ml_ep_grid"/>
+				</OnScrollUp>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="14" sizeY="3" color="f97b03"/>
+				</StaticImage>
+				<StaticImage name="#dk2ml_ep_header_plus" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="3" sizeY="14" color="f97b03"/>
+				</StaticImage>
+			</Button>
 		</Item>
 
 		<!-- "N MORE BELOW": shown in the space under the last row when rows didn't fit (only whole rows are shown). The

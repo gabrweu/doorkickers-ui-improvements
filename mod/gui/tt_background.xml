@@ -1,0 +1,53 @@
+<!--
+Trooper Toolbox background: TT paints its main page's slot frames into its background texture, so a slot the plugin
+hides (no options for the trooper) leaves an empty frame, and the slots moved over from TT's second page have none.
+With the plugin's "Trooper Toolbox: all slots on one page" merge, ttbg.cpp swaps the background for #dk2ml_tt_bg
+(Trooper Toolbox's own background, art by Sly, used with permission, with its frames painted out by
+tools/clean_tt_bg.py) and gives every slot a frame of its own, as a child of the slot, so a hidden slot takes its frame
+with it.
+
+#dk2ml_tt_bg is moved into TT's customization_bg_image, next to TT's own image (which is hidden meanwhile), so TT's
+Show/Hide of that item (it swaps to a black background while an equipment list is open) keeps working. Like TT's, it
+steals focus: a click on the panel must not reach the screen's close-on-click catcher.
+
+The frame templates are cloned once per slot and their bars stretched to the slot's box. All StaticImages, so they
+never take the cursor from the slot. Without Trooper Toolbox or the plugin, everything here stays hidden.
+-->
+<GUIItems>
+	<StaticImage name="#dk2ml_tt_bg" stealFocus="true" hidden="true">
+		<RenderObject2D texture="data/textures/gui/dk2ml_tt_bg.tga" sizeX="1400" sizeY="1401" color="ffffffc0"/>
+	</StaticImage>
+
+	<StaticImage name="#dk2ml_tt_frame" hidden="true">
+		<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="16" color="00000000"/>
+		<StaticImage name="#dk2ml_tt_frame_t">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="4" color="f0e3cc"/>
+		</StaticImage>
+		<StaticImage name="#dk2ml_tt_frame_b">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="4" color="f0e3cc"/>
+		</StaticImage>
+		<StaticImage name="#dk2ml_tt_frame_l">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="4" sizeY="16" color="f0e3cc"/>
+		</StaticImage>
+		<StaticImage name="#dk2ml_tt_frame_r">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="4" sizeY="16" color="f0e3cc"/>
+		</StaticImage>
+	</StaticImage>
+
+	<!-- for the Armor box, which sits on the figure's cream plate carrier -->
+	<StaticImage name="#dk2ml_tt_frame_dark" hidden="true">
+		<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="16" color="00000000"/>
+		<StaticImage name="#dk2ml_tt_frame_t">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="4" color="211e1d"/>
+		</StaticImage>
+		<StaticImage name="#dk2ml_tt_frame_b">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="16" sizeY="4" color="211e1d"/>
+		</StaticImage>
+		<StaticImage name="#dk2ml_tt_frame_l">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="4" sizeY="16" color="211e1d"/>
+		</StaticImage>
+		<StaticImage name="#dk2ml_tt_frame_r">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="4" sizeY="16" color="211e1d"/>
+		</StaticImage>
+	</StaticImage>
+</GUIItems>

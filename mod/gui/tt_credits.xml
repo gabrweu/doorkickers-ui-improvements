@@ -1,0 +1,44 @@
+<!--
+Trooper Toolbox credits: TT shows its credits on its second page (baked into that page's background). With the plugin's
+"Trooper Toolbox: all slots on one page" merge, that page is never opened, so the credits sit behind this CREDITS
+button on the main page instead, as text in a pop-up shown while the button is hovered.
+
+The plugin (ttmerge.cpp) moves #dk2ml_tt_credits into TT's #inventory_panel when it merges the pages (so it shares the
+panel's coordinates and hides with it when an equipment list opens) and shows it only while merged. Without Trooper
+Toolbox or the plugin it stays hidden. The origin is the spot of TT's "More Gear and Cosmetics" button, which the merge
+removes.
+
+The pop-up is StaticImages and StaticTexts only, so it never takes the cursor from the button.
+-->
+<GUIItems>
+	<Button name="#dk2ml_tt_credits" align="r" origin="-345 -635" hidden="true">
+		<RenderObject2D texture="data/textures/gui/square.tga" sizeX="200" sizeY="48" color="f0e3cc" blendMode="none"/>
+		<ButtonText text="CREDITS" font="header_4" origin="0 0" align="c" textColor="40392b"/>
+		<OnHover>
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="200" sizeY="48" color="40392b" blendMode="none"/>
+			<ButtonText text="CREDITS" font="header_4" origin="0 0" align="c" textColor="f0e3cc"/>
+			<Action type="Show" target="#dk2ml_tt_credits_popup"/>
+		</OnHover>
+		<OnHoverEnd>
+			<Action type="Hide" target="#dk2ml_tt_credits_popup"/>
+		</OnHoverEnd>
+
+		<!-- above the button: 24 (half the button) + 12 gap + 165 (half the pop-up) -->
+		<StaticImage name="#dk2ml_tt_credits_popup" origin="0 201" hidden="true">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="604" sizeY="334" color="f97b03"/>
+			<StaticImage>
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="600" sizeY="330" color="0c0b0bf0"/>
+			</StaticImage>
+			<StaticText align="lt" origin="24 -12" font="header_4" textColor="f97b03" text="TROOPER TOOLBOX BY SLY"/>
+			<StaticText align="lt" origin="24 -50" font="header_5" textColor="f0e3cc" text="MOD CREDITS"/>
+			<StaticText align="lt" origin="24 -86" font="paragraph_3" textColor="f0e3cc" text="KillHouseGames - Labor of Love, Mod Support"/>
+			<StaticText align="lt" origin="24 -114" font="paragraph_3" textColor="f0e3cc" text="AnthonyNonStop - Conceptual Assistance"/>
+			<StaticText align="lt" origin="24 -142" font="paragraph_3" textColor="f0e3cc" text="Rosh - Testing and Caffeine Provider"/>
+			<StaticText align="lt" origin="24 -170" font="paragraph_3" textColor="f0e3cc" text="Levan - Testing and Feet of Steel UI"/>
+			<StaticText align="lt" origin="24 -198" font="paragraph_3" textColor="f0e3cc" text="Haven - Testing"/>
+			<StaticText align="lt" origin="24 -226" font="paragraph_3" textColor="f0e3cc" text="UberChad - Testing"/>
+			<StaticText align="lt" origin="24 -254" font="paragraph_3" textColor="f0e3cc" text="Briz - Refinement and Testing"/>
+			<StaticText align="lt" origin="24 -282" font="paragraph_3" textColor="f0e3cc" text="The DK2 Community - Endless Support :)"/>
+		</StaticImage>
+	</Button>
+</GUIItems>

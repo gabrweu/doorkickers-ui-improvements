@@ -12,16 +12,17 @@ lays them out and re-skins them as the list scrolls.
 Item names all start with #dk2ml_ps_ so they're unique across the whole GUI.
 -->
 <GUIItems>
-	<!-- origin is relative to the large portrait (536x464): bottom right corner, above the rank/XP panel (which covers
-		 the bottom 96 px of the portrait) and clear of the arrows and class icon -->
-	<Item name="#dk2ml_ps_open" align="rb" origin="-15 106" sizeX="64" sizeY="64" hidden="true">
+	<!-- origin is relative to the large portrait (536x464): bottom left corner, above the rank/XP panel (which covers
+		 the bottom 96 px of the portrait), right of the info "i" button, which the plugin moves down from the top left
+		 (its bottom edge at the same 106 px: kInfoBottom in picker.cpp) -->
+	<Item name="#dk2ml_ps_open" align="lb" origin="73 106" sizeX="48" sizeY="48" hidden="true">
 		<Button name="#dk2ml_ps_open_btn" tooltip="Choose portrait">
-			<RenderObject2D texture="data/textures/gui/dk2ml_ps_open_normal.dds" blendMode="none"/>
+			<RenderObject2D texture="data/textures/gui/dk2ml_ps_open_normal.tga"/>
 			<OnHover>
-				<RenderObject2D texture="data/textures/gui/dk2ml_ps_open_hover.dds" blendMode="none"/>
+				<RenderObject2D texture="data/textures/gui/dk2ml_ps_open_hover.tga"/>
 			</OnHover>
 			<OnClick>
-				<RenderObject2D texture="data/textures/gui/dk2ml_ps_open_hover.dds" scaleX="0.95" scaleY="0.95" blendMode="none"/>
+				<RenderObject2D texture="data/textures/gui/dk2ml_ps_open_hover.tga" scaleX="0.95" scaleY="0.95"/>
 				<Action type="PlaySound" target="gui_customize_equip"/>
 				<Action type="Callback" target="#dk2ml_ps_open"/>
 			</OnClick>

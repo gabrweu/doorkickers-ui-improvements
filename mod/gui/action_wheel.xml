@@ -1,0 +1,69 @@
+<!--
+The mission action wheel on one page (src/hud/wheel.cpp). When the right-click wheel (#waypoint_menu in the game's
+waypoints.xml) has a target page and a path page, the plugin puts the target page's buttons on an outer ring around
+the path page.
+
+#dk2ml_wm_hold: where the target page's buttons wait while the plugin builds the path page (the game deletes
+everything left in #menu_parent on each build). Hidden, never drawn.
+
+#dk2ml_wm_badge: the door badge (textures/gui/dk2ml_wm_door.tga, from tools/make_art.ps1: the wheel's door-opening
+icon redrawn with an orange arrow), cloned onto outer
+equipment buttons.
+
+#dk2ml_wm_outer: moved into #waypoint_menu right after the stock ring's images (over the stock shadows, under the
+buttons, hit-tested after them), shown only
+while the wheel has an outer ring. Our own ring (textures/gui/dk2ml_wm_ring.tga, from tools/make_art.ps1): a dotted
+line (4.5-unit dots ~12 apart), at radius 308 (the outer buttons sit at 187 + 128 = 315; stock draws its dashed line 7
+inside its buttons too), drawn at 2x so it stays sharp; and a click catcher (stealFocus) so a click between outer
+buttons doesn't reach the map.
+
+#dk2ml_wm_inner: our inner ring (textures/gui/dk2ml_wm_ring_inner.tga), shown on every wheel while the setting is on,
+with the stock ring images hidden. Placed right after #dk2ml_wm_outer, both where the stock ring is drawn (over the stock shadows, which would darken it).
+
+Both rings: the cream art tinted a39a8c and drawn at 60% (99), a little darker than the stock ring (ffffff at 50%),
+so the buttons stand out. One color attribute per quarter image.
+-->
+<GUIItems>
+	<Item name="#dk2ml_wm_hold" hidden="true"/>
+
+	<!-- cloned into each outer-ring equipment button that has a twin on the inner ring: that one uses the item on the
+	     target (a flashbang into the room), the inner one throws it at a spot. Top right of the 120 px button (its
+	     count is bottom right). No tooltip: clones would share it. -->
+	<StaticImage name="#dk2ml_wm_badge" hidden="true">
+		<RenderObject2D texture="data/textures/gui/dk2ml_wm_door.tga" scaleX="0.75" scaleY="0.75"/>
+	</StaticImage>
+
+	<!-- in place of the stock ring (#menu_ring and its mirror, hidden while the setting is on): a dotted line, at the
+	     stock dashed line's radius 180; one 368x368 quarter (184x184 units at scale 0.5) flipped into four. A plain Item
+	     with no size: never hit-tested. -->
+	<Item name="#dk2ml_wm_inner" hidden="true">
+		<StaticImage origin="92 92">
+			<RenderObject2D texture="data/textures/gui/dk2ml_wm_ring_inner.tga" color="a39a8c99" scaleX="0.5" scaleY="0.5"/>
+		</StaticImage>
+		<StaticImage origin="-92 92">
+			<RenderObject2D texture="data/textures/gui/dk2ml_wm_ring_inner.tga" color="a39a8c99" scaleX="0.5" scaleY="0.5" flipX="true"/>
+		</StaticImage>
+		<StaticImage origin="92 -92">
+			<RenderObject2D texture="data/textures/gui/dk2ml_wm_ring_inner.tga" color="a39a8c99" scaleX="0.5" scaleY="0.5" flipY="true"/>
+		</StaticImage>
+		<StaticImage origin="-92 -92">
+			<RenderObject2D texture="data/textures/gui/dk2ml_wm_ring_inner.tga" color="a39a8c99" scaleX="0.5" scaleY="0.5" flipX="true" flipY="true"/>
+		</StaticImage>
+	</Item>
+
+	<!-- the ring: one 640x640 quarter (the top right, 320x320 units at scale 0.5) flipped into four around the centre -->
+	<Item name="#dk2ml_wm_outer" sizeX="760" sizeY="760" stealFocus="true" hidden="true">
+		<StaticImage origin="160 160">
+			<RenderObject2D texture="data/textures/gui/dk2ml_wm_ring.tga" color="a39a8c99" scaleX="0.5" scaleY="0.5"/>
+		</StaticImage>
+		<StaticImage origin="-160 160">
+			<RenderObject2D texture="data/textures/gui/dk2ml_wm_ring.tga" color="a39a8c99" scaleX="0.5" scaleY="0.5" flipX="true"/>
+		</StaticImage>
+		<StaticImage origin="160 -160">
+			<RenderObject2D texture="data/textures/gui/dk2ml_wm_ring.tga" color="a39a8c99" scaleX="0.5" scaleY="0.5" flipY="true"/>
+		</StaticImage>
+		<StaticImage origin="-160 -160">
+			<RenderObject2D texture="data/textures/gui/dk2ml_wm_ring.tga" color="a39a8c99" scaleX="0.5" scaleY="0.5" flipX="true" flipY="true"/>
+		</StaticImage>
+	</Item>
+</GUIItems>

@@ -10,26 +10,29 @@ if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "Door Kickers 2 is 64-bit; configure with an x64 toolchain")
 endif()
 
-# the plugin API header (dk2ml.h) from the mod loader repo, or an extracted release's sdk\ folder
-set(DK2ML_SDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../doorkickers-modloader/include" CACHE PATH "folder containing dk2ml.h")
-if(NOT EXISTS "${DK2ML_SDK_DIR}/dk2ml.h")
-    message(FATAL_ERROR "dk2ml.h not found in DK2ML_SDK_DIR (${DK2ML_SDK_DIR})")
-endif()
-
+# A dk2ml (Door Kickers 2 Native Mod Loader) plugin. The loader's public headers are in dk2ml/ (see dk2ml/README.md).
 add_library(dk2_eras_ui_improvements SHARED
-    src/back.cpp
-    src/cursor.cpp
-    src/game.cpp
-    src/gui.cpp
-    src/entries.cpp
-    src/grid.cpp
-    src/hudtip.cpp
-    src/picker.cpp
     src/plugin.cpp
-    src/portraits.cpp
-    src/settings.cpp
-    src/slots.cpp
-    src/ttmerge.cpp)
-target_include_directories(dk2_eras_ui_improvements PRIVATE "${DK2ML_SDK_DIR}")
-target_compile_definitions(dk2_eras_ui_improvements PRIVATE UNICODE _UNICODE)
+    src/core/game.cpp
+    src/core/gui.cpp
+    src/core/settings.cpp
+    src/campaigns/cards.cpp
+    src/equipment/back.cpp
+    src/equipment/entries.cpp
+    src/equipment/grid.cpp
+    src/loadouts/store.cpp
+    src/loadouts/history.cpp
+    src/loadouts/panel.cpp
+    src/slots/concealment.cpp
+    src/slots/slots.cpp
+    src/slots/ttbg.cpp
+    src/slots/ttmerge.cpp
+    src/portraits/picker.cpp
+    src/portraits/portraits.cpp
+    src/hud/cursor.cpp
+    src/hud/hudtip.cpp
+    src/hud/wheel.cpp)
+# local includes are relative to src/ ("core/game.h")
+target_include_directories(dk2_eras_ui_improvements PRIVATE src dk2ml)
+target_compile_definitions(dk2_eras_ui_improvements PRIVATE UNICODE _UNICODE PLUGIN_VERSION="${PROJECT_VERSION}") # the manifest
 target_link_libraries(dk2_eras_ui_improvements PRIVATE user32)

@@ -1,0 +1,33 @@
+<!--
+Campaign cards: on the campaign selection screen (Menu_CampaignSelect in stock campaign.xml), a badge on each card of
+a campaign some squad has finished ("COMPLETED x2", with the campaign's medal), and, while the card is hovered, the
+list of the squads that finished it. The data is the game's campaign history (campaign_history.xml).
+
+The plugin clones these templates per card (GUI::StaticImage::CloneInternal): the badge becomes the card's last
+child, and the list goes into the card's #campaign_hover, which the card's own OnHover / OnHoverEnd show and hide.
+Everything here is a StaticImage or StaticText, which never take the cursor, so the card keeps its hover and click.
+The plugin sizes and places them: the badge's width (medal + text), the list's height (fitted to the names), and the
+aligned texts' origins. Texts the plugin sets can't get longer than their XML placeholder.
+-->
+<GUIItems>
+	<StaticImage name="#dk2ml_cc_badge_template" hidden="true">
+		<RenderObject2D texture="data/textures/gui/square.tga" sizeX="240" sizeY="44" color="0c0b0be6"/>
+		<StaticImage name="#dk2ml_cc_medal">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="100" sizeY="32" color="00000000"/>
+		</StaticImage>
+		<StaticText name="#dk2ml_cc_badge_text" align="r" origin="-12 0" font="header_5" textColor="f0e3cc"
+			text="XXXXXXXXXXXXXXXXXXXXXXXX"/>
+	</StaticImage>
+
+	<!-- the root is the orange frame; the fill, title and names on it -->
+	<StaticImage name="#dk2ml_cc_list_template" hidden="true">
+		<RenderObject2D texture="data/textures/gui/square.tga" sizeX="484" sizeY="120" color="f97b03"/>
+		<StaticImage name="#dk2ml_cc_list_bg">
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="480" sizeY="116" color="0c0b0bf0"/>
+		</StaticImage>
+		<StaticText name="#dk2ml_cc_list_title" align="t" origin="0 -14" font="header_5" textColor="f97b03"
+			text="COMPLETED BY"/>
+		<StaticText name="#dk2ml_cc_list_text" align="t" origin="0 -50" sizeX="450" wordWrap="true" font="paragraph_2" textColor="f0e3cc"
+			text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+	</StaticImage>
+</GUIItems>

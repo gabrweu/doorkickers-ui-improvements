@@ -1,6 +1,6 @@
 # Builds the plugin (build\dk2_eras_ui_improvements.dll) in Release with MSVC x64.
 # -SymTest then dry-runs its init against the game's PDB with the mod loader's symtest.exe (build the loader first);
-# it must print "plugin init returned 0".
+# it must exit 0 ("plugin init returned 0" and no PROBLEM lines; 100 means a call the loader would refuse).
 param(
     [string]$Config = 'Release',
     [switch]$SymTest,
@@ -27,4 +27,5 @@ if ($SymTest) {
     $symtestExe = Join-Path $src '..\doorkickers-modloader\build\symtest.exe'
     if (-not (Test-Path $symtestExe)) { throw "symtest.exe not found ($symtestExe); build the mod loader first" }
     & $symtestExe $GameDir $dll # no trailing backslash: it would escape the closing quote; symtest adds one
+    if ($LASTEXITCODE -ne 0) { throw "symtest dry run failed (exit code $LASTEXITCODE)" }
 }

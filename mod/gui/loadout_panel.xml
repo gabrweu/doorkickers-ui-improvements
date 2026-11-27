@@ -1,0 +1,809 @@
+<!--
+Loadouts panel: left of the Customization screen, an operator's own saved loadouts and the squad's (team loadouts), 5
+each, every one the whole loadout (guns, gear, helmet, armor, cosmetics). Clicking a row equips all of it; SAVE stores
+everything the operator has equipped now; the pencil renames it (the plugin moves #dk2ml_lo_rename_box onto the row and
+focuses it); X erases it (its items and name). A row shows its name, or its weapons when it has none. Hovering a row
+shows #dk2ml_lo_preview beside the panel: everything in that loadout (weapons with names, the rest as icons). It's in
+its own layer (#dk2ml_lo_preview_layer), the screen's last child, so it draws over the profile panel.
+After the operator's 5, #dk2ml_lo_my_default loads the class's starting loadout (it can't be saved, renamed or erased).
+UNDO (bottom right) puts back the operator's gear from before the last change, step by step.
+Team loadouts are shared: any squadmate can save or rename one, every squadmate can load it.
+
+The plugin (loadouts/panel.cpp) moves #dk2ml_lo_panel into Customization_Screen (it captures input), fills the titles,
+rows and status line, and shows it while no equipment list is open. Without the plugin it stays hidden.
+Like the portrait picker, the background is stealFocus and comes before the controls, as a sibling, not their parent:
+a click on empty panel space must not fall through to the screen's catcher (which closes the screen), and a stealFocus
+item under the cursor takes the click itself without testing its children.
+Generated (420x646); item names all start with #dk2ml_lo_ so they're unique across the whole GUI.
+-->
+<GUIItems>
+	<!-- right edge 20 px left of the screen's left edge, top 20 px below its top -->
+	<Item name="#dk2ml_lo_panel" align="lt" origin="-440 -20" sizeX="420" sizeY="646" hidden="true">
+		<StaticImage stealFocus="true">
+			<RenderObject2D texture="data/textures/gui/menu_darkbrown_background.tga" sizeX="420" sizeY="646" color="fffffff0"/>
+		</StaticImage>
+		<Item name="#dk2ml_lo_box" sizeX="420" sizeY="646">
+			<StaticImage align="t">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="420" sizeY="4" color="f97b03"/>
+			</StaticImage>
+			<StaticText name="#dk2ml_lo_my_title" align="lt" origin="16 -16" sizeX="388" wordWrap="true" font="header_4" textColor="f97b03" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<Button name="#dk2ml_lo_my_1" align="lt" origin="16 -60">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_1"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_my_1"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_1"/>
+				</OnClick>
+				<StaticText name="#dk2ml_lo_my_1_num" align="l" origin="12 0" font="header_5" textColor="f0e3cc" text="1"/>
+				<StaticText name="#dk2ml_lo_my_1_text" align="l" origin="40 0" sizeX="194" wordWrap="true" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_my_1_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_my_1_rename" align="lt" origin="262 -60" tooltip="Rename this loadout (type, then Enter or click elsewhere; an empty name removes it).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_1_rename"/>
+				</OnClick>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/customization/edit_name.dds" scaleX="0.45" scaleY="0.45"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_my_1_erase" align="lt" origin="300 -60" tooltip="Erase this loadout (its items and name).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<ButtonText text="X" font="header_5" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_1_erase"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_my_1_save" align="lt" origin="340 -60" tooltip="Save everything this operator has equipped now as their loadout 1.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="SAVE" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_1_save"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_my_2" align="lt" origin="16 -96">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_2"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_my_2"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_2"/>
+				</OnClick>
+				<StaticText name="#dk2ml_lo_my_2_num" align="l" origin="12 0" font="header_5" textColor="f0e3cc" text="2"/>
+				<StaticText name="#dk2ml_lo_my_2_text" align="l" origin="40 0" sizeX="194" wordWrap="true" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_my_2_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_my_2_rename" align="lt" origin="262 -96" tooltip="Rename this loadout (type, then Enter or click elsewhere; an empty name removes it).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_2_rename"/>
+				</OnClick>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/customization/edit_name.dds" scaleX="0.45" scaleY="0.45"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_my_2_erase" align="lt" origin="300 -96" tooltip="Erase this loadout (its items and name).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<ButtonText text="X" font="header_5" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_2_erase"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_my_2_save" align="lt" origin="340 -96" tooltip="Save everything this operator has equipped now as their loadout 2.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="SAVE" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_2_save"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_my_3" align="lt" origin="16 -132">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_3"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_my_3"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_3"/>
+				</OnClick>
+				<StaticText name="#dk2ml_lo_my_3_num" align="l" origin="12 0" font="header_5" textColor="f0e3cc" text="3"/>
+				<StaticText name="#dk2ml_lo_my_3_text" align="l" origin="40 0" sizeX="194" wordWrap="true" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_my_3_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_my_3_rename" align="lt" origin="262 -132" tooltip="Rename this loadout (type, then Enter or click elsewhere; an empty name removes it).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_3_rename"/>
+				</OnClick>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/customization/edit_name.dds" scaleX="0.45" scaleY="0.45"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_my_3_erase" align="lt" origin="300 -132" tooltip="Erase this loadout (its items and name).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<ButtonText text="X" font="header_5" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_3_erase"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_my_3_save" align="lt" origin="340 -132" tooltip="Save everything this operator has equipped now as their loadout 3.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="SAVE" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_3_save"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_my_4" align="lt" origin="16 -168">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_4"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_my_4"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_4"/>
+				</OnClick>
+				<StaticText name="#dk2ml_lo_my_4_num" align="l" origin="12 0" font="header_5" textColor="f0e3cc" text="4"/>
+				<StaticText name="#dk2ml_lo_my_4_text" align="l" origin="40 0" sizeX="194" wordWrap="true" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_my_4_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_my_4_rename" align="lt" origin="262 -168" tooltip="Rename this loadout (type, then Enter or click elsewhere; an empty name removes it).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_4_rename"/>
+				</OnClick>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/customization/edit_name.dds" scaleX="0.45" scaleY="0.45"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_my_4_erase" align="lt" origin="300 -168" tooltip="Erase this loadout (its items and name).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<ButtonText text="X" font="header_5" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_4_erase"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_my_4_save" align="lt" origin="340 -168" tooltip="Save everything this operator has equipped now as their loadout 4.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="SAVE" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_4_save"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_my_5" align="lt" origin="16 -204">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_5"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_my_5"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_5"/>
+				</OnClick>
+				<StaticText name="#dk2ml_lo_my_5_num" align="l" origin="12 0" font="header_5" textColor="f0e3cc" text="5"/>
+				<StaticText name="#dk2ml_lo_my_5_text" align="l" origin="40 0" sizeX="194" wordWrap="true" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_my_5_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_my_5_rename" align="lt" origin="262 -204" tooltip="Rename this loadout (type, then Enter or click elsewhere; an empty name removes it).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_5_rename"/>
+				</OnClick>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/customization/edit_name.dds" scaleX="0.45" scaleY="0.45"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_my_5_erase" align="lt" origin="300 -204" tooltip="Erase this loadout (its items and name).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<ButtonText text="X" font="header_5" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_5_erase"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_my_5_save" align="lt" origin="340 -204" tooltip="Save everything this operator has equipped now as their loadout 5.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="SAVE" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_5_save"/>
+				</OnClick>
+			</Button>
+			<!-- the class's starting loadout: not saveable, loads only (no pencil, X or SAVE) -->
+			<Button name="#dk2ml_lo_my_default" align="lt" origin="16 -240">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="388" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="388" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_my_default"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_my_default"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="388" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_my_default"/>
+				</OnClick>
+				<!-- no sizeX: it lands on its origin, fitted to the row at run time -->
+				<StaticText name="#dk2ml_lo_my_default_text" align="l" origin="12 0" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_my_default_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<StaticText name="#dk2ml_lo_team_title" align="lt" origin="16 -294" sizeX="388" wordWrap="true" font="header_4" textColor="f97b03" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<Button name="#dk2ml_lo_team_1" align="lt" origin="16 -338">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_team_1"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_team_1"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_1"/>
+				</OnClick>
+				<StaticText name="#dk2ml_lo_team_1_num" align="l" origin="12 0" font="header_5" textColor="f0e3cc" text="1"/>
+				<StaticText name="#dk2ml_lo_team_1_text" align="l" origin="40 0" sizeX="194" wordWrap="true" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_team_1_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_team_1_rename" align="lt" origin="262 -338" tooltip="Rename this loadout (type, then Enter or click elsewhere; an empty name removes it).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_team_1_rename"/>
+				</OnClick>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/customization/edit_name.dds" scaleX="0.45" scaleY="0.45"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_team_1_erase" align="lt" origin="300 -338" tooltip="Erase this loadout (its items and name).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<ButtonText text="X" font="header_5" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_1_erase"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_team_1_save" align="lt" origin="340 -338" tooltip="Save everything this operator has equipped now as the squad's team loadout 1, for every squadmate.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="SAVE" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_1_save"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_team_2" align="lt" origin="16 -374">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_team_2"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_team_2"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_2"/>
+				</OnClick>
+				<StaticText name="#dk2ml_lo_team_2_num" align="l" origin="12 0" font="header_5" textColor="f0e3cc" text="2"/>
+				<StaticText name="#dk2ml_lo_team_2_text" align="l" origin="40 0" sizeX="194" wordWrap="true" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_team_2_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_team_2_rename" align="lt" origin="262 -374" tooltip="Rename this loadout (type, then Enter or click elsewhere; an empty name removes it).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_team_2_rename"/>
+				</OnClick>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/customization/edit_name.dds" scaleX="0.45" scaleY="0.45"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_team_2_erase" align="lt" origin="300 -374" tooltip="Erase this loadout (its items and name).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<ButtonText text="X" font="header_5" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_2_erase"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_team_2_save" align="lt" origin="340 -374" tooltip="Save everything this operator has equipped now as the squad's team loadout 2, for every squadmate.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="SAVE" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_2_save"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_team_3" align="lt" origin="16 -410">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_team_3"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_team_3"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_3"/>
+				</OnClick>
+				<StaticText name="#dk2ml_lo_team_3_num" align="l" origin="12 0" font="header_5" textColor="f0e3cc" text="3"/>
+				<StaticText name="#dk2ml_lo_team_3_text" align="l" origin="40 0" sizeX="194" wordWrap="true" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_team_3_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_team_3_rename" align="lt" origin="262 -410" tooltip="Rename this loadout (type, then Enter or click elsewhere; an empty name removes it).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_team_3_rename"/>
+				</OnClick>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/customization/edit_name.dds" scaleX="0.45" scaleY="0.45"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_team_3_erase" align="lt" origin="300 -410" tooltip="Erase this loadout (its items and name).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<ButtonText text="X" font="header_5" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_3_erase"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_team_3_save" align="lt" origin="340 -410" tooltip="Save everything this operator has equipped now as the squad's team loadout 3, for every squadmate.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="SAVE" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_3_save"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_team_4" align="lt" origin="16 -446">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_team_4"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_team_4"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_4"/>
+				</OnClick>
+				<StaticText name="#dk2ml_lo_team_4_num" align="l" origin="12 0" font="header_5" textColor="f0e3cc" text="4"/>
+				<StaticText name="#dk2ml_lo_team_4_text" align="l" origin="40 0" sizeX="194" wordWrap="true" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_team_4_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_team_4_rename" align="lt" origin="262 -446" tooltip="Rename this loadout (type, then Enter or click elsewhere; an empty name removes it).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_team_4_rename"/>
+				</OnClick>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/customization/edit_name.dds" scaleX="0.45" scaleY="0.45"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_team_4_erase" align="lt" origin="300 -446" tooltip="Erase this loadout (its items and name).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<ButtonText text="X" font="header_5" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_4_erase"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_team_4_save" align="lt" origin="340 -446" tooltip="Save everything this operator has equipped now as the squad's team loadout 4, for every squadmate.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="SAVE" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_4_save"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_team_5" align="lt" origin="16 -482">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_team_5"/> <!-- the pop-up with everything in it -->
+				</OnHover>
+				<OnHoverEnd>
+					<Action type="Callback" target="#dk2ml_lo_team_5"/>
+				</OnHoverEnd>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="242" sizeY="34" color="605a4fd0"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_5"/>
+				</OnClick>
+				<StaticText name="#dk2ml_lo_team_5_num" align="l" origin="12 0" font="header_5" textColor="f0e3cc" text="5"/>
+				<StaticText name="#dk2ml_lo_team_5_text" align="l" origin="40 0" sizeX="194" wordWrap="true" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+				<StaticImage name="#dk2ml_lo_team_5_on" align="l" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="5" sizeY="34" color="f97b03"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_team_5_rename" align="lt" origin="262 -482" tooltip="Rename this loadout (type, then Enter or click elsewhere; an empty name removes it).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<Action type="Callback" target="#dk2ml_lo_team_5_rename"/>
+				</OnClick>
+				<StaticImage>
+					<RenderObject2D texture="data/textures/gui/customization/edit_name.dds" scaleX="0.45" scaleY="0.45"/>
+				</StaticImage>
+			</Button>
+			<Button name="#dk2ml_lo_team_5_erase" align="lt" origin="300 -482" tooltip="Erase this loadout (its items and name).">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4f60"/>
+				<ButtonText text="X" font="header_5" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="34" sizeY="34" color="605a4fd0"/>
+					<ButtonText text="X" font="header_5" textColor="f97b03"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_5_erase"/>
+				</OnClick>
+			</Button>
+			<Button name="#dk2ml_lo_team_5_save" align="lt" origin="340 -482" tooltip="Save everything this operator has equipped now as the squad's team loadout 5, for every squadmate.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="SAVE" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="64" sizeY="34" color="f97b03"/>
+					<ButtonText text="SAVE" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_team_5_save"/>
+				</OnClick>
+			</Button>
+			<StaticText name="#dk2ml_lo_status" align="lt" origin="16 -536" sizeX="388" wordWrap="true" font="paragraph_3" textColor="c8bca8" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<!-- bottom right, under the status line -->
+			<Button name="#dk2ml_lo_undo" align="lt" origin="324 -596" tooltip="Undo the last change to this operator's gear (a loaded loadout, or single items). Click again to go further back.">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="80" sizeY="34" color="f0e3cc"/>
+				<ButtonText text="UNDO" font="header_5" textColor="40392b"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="80" sizeY="34" color="f97b03"/>
+					<ButtonText text="UNDO" font="header_5" textColor="211e1d"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="80" sizeY="34" color="f97b03"/>
+					<ButtonText text="UNDO" font="header_5" textColor="211e1d"/>
+					<Action type="PlaySound" target="gui_customize_equip"/>
+					<Action type="Callback" target="#dk2ml_lo_undo"/>
+				</OnClick>
+				<!-- shown while there is nothing to undo -->
+				<StaticImage name="#dk2ml_lo_undo_off" hidden="true">
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="80" sizeY="34" color="0c0b0bb0"/>
+				</StaticImage>
+			</Button>
+			<Editbox name="#dk2ml_lo_rename_box" align="lt" origin="16 -16" hidden="true" acceptNumbers="true" acceptLetters="true" forceUppercase="false" unfocusWhenEmpty="false" maxCharacters="24" focusedTextColor="ffffffff">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="212" sizeY="34" color="000000e6"/>
+				<TextFormat origin="10 0" align="l" text="" font="paragraph_3" textColor="f0e3cc"/>
+				<OnHover>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="212" sizeY="34" color="000000e6"/>
+				</OnHover>
+				<OnClick>
+					<RenderObject2D texture="data/textures/gui/square.tga" sizeX="212" sizeY="34" color="000000e6"/>
+				</OnClick>
+				<Cursor>
+					<RenderObject2D texture="data/textures/gui/editbox_cursor.tga" scaleY="1.5"/>
+				</Cursor>
+			</Editbox>
+		</Item>
+	</Item>
+
+	<!-- the hover pop-up's layer: placed and sized like #dk2ml_lo_panel (so the pop-up's coordinates are the box's), moved
+	     into Customization_Screen as its last child so the pop-up draws over the profile panel (the panel sits under it,
+	     for the (i) STATS pop-up). A StaticImage with a transparent texture, not an Item: it lies over the whole panel, and
+	     StaticImages never take the cursor, so the rows keep their hover and clicks. Shown by the plugin once moved -->
+	<StaticImage name="#dk2ml_lo_preview_layer" align="lt" origin="-440 -20" sizeX="420" sizeY="646" hidden="true">
+		<RenderObject2D texture="data/textures/gui/square.tga" sizeX="420" sizeY="646" color="00000000"/>
+		<!-- hover pop-up for a row: everything in that loadout, by GUNS / GEAR / LOOKS. Weapons get their icon, name and
+		     attachments; everything else is an icon, 6 per row. The plugin places it right of the panel, level with the row,
+		     fills what it needs (3 weapon rows, 16 icons; the rest hidden), sets its height and stretches the two
+		     backgrounds. Only StaticImages / StaticTexts inside, no tooltips. The texts have no sizeX: one line, fitted by
+		     width in code, and a sized label wouldn't take its lt origin (see CLAUDE.md, XML gotchas); they can't get longer
+		     than their placeholders. The icons aren't aligned (placed from the centre) -->
+		<Item name="#dk2ml_lo_preview" sizeX="452" sizeY="300" hidden="true">
+			<StaticImage name="#dk2ml_lo_preview_border">
+				<RenderObject2D texture="data/textures/gui/square.tga" sizeX="456" sizeY="304" color="f97b03"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_bg">
+				<RenderObject2D texture="data/textures/gui/menu_darkbrown_background.tga" sizeX="452" sizeY="300" color="ffffffff"/>
+			</StaticImage>
+			<StaticText name="#dk2ml_lo_preview_title" align="lt" origin="12 -12" font="header_5" textColor="f97b03" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<StaticText name="#dk2ml_lo_preview_guns" align="lt" origin="12 -46" font="header_5" textColor="f0e3cc" text="GUNS"/>
+			<StaticText name="#dk2ml_lo_preview_gear" align="lt" origin="12 -46" font="header_5" textColor="f0e3cc" text="GEAR"/>
+			<StaticText name="#dk2ml_lo_preview_looks" align="lt" origin="12 -46" font="header_5" textColor="f0e3cc" text="LOOKS"/>
+			<StaticText name="#dk2ml_lo_preview_none" align="lt" origin="12 -46" font="paragraph_3" textColor="a89c88" text="Nothing equipped"/>
+			<StaticText name="#dk2ml_lo_preview_hint" align="lt" origin="12 -46" font="paragraph_3" textColor="a89c88" text="Click to equip all of it"/>
+			<StaticImage name="#dk2ml_lo_preview_gun_1_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.45" scaleY="0.45"/>
+			</StaticImage>
+			<StaticText name="#dk2ml_lo_preview_gun_1_name" align="lt" origin="0 0" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<StaticText name="#dk2ml_lo_preview_gun_1_att" align="lt" origin="0 0" font="paragraph_3" textColor="a89c88" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<StaticImage name="#dk2ml_lo_preview_gun_2_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.45" scaleY="0.45"/>
+			</StaticImage>
+			<StaticText name="#dk2ml_lo_preview_gun_2_name" align="lt" origin="0 0" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<StaticText name="#dk2ml_lo_preview_gun_2_att" align="lt" origin="0 0" font="paragraph_3" textColor="a89c88" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<StaticImage name="#dk2ml_lo_preview_gun_3_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.45" scaleY="0.45"/>
+			</StaticImage>
+			<StaticText name="#dk2ml_lo_preview_gun_3_name" align="lt" origin="0 0" font="paragraph_3" textColor="f0e3cc" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<StaticText name="#dk2ml_lo_preview_gun_3_att" align="lt" origin="0 0" font="paragraph_3" textColor="a89c88" text="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+			<StaticImage name="#dk2ml_lo_preview_tile_1_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_2_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_3_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_4_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_5_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_6_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_7_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_8_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_9_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_10_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_11_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_12_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_13_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_14_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_15_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+			<StaticImage name="#dk2ml_lo_preview_tile_16_img">
+				<RenderObject2D texture="data/textures/gui/square.tga" scaleX="0.5" scaleY="0.5"/>
+			</StaticImage>
+		</Item>
+	</StaticImage>
+
+	<!-- the slot padlock: the plugin clones it into the top-right corner of each lockable slot (its last child, so a click
+		 on it doesn't open the item list). No tooltip: clones would share it. Our art (tools/make_art.ps1): _off is a
+		 faint open padlock, _on a closed orange one on a small dark chip framed in cream, like the NVG slot. -->
+	<Button name="#dk2ml_lo_lock_template" align="rt" origin="-7 -7" hidden="true">
+		<RenderObject2D texture="data/textures/gui/square.tga" sizeX="22" sizeY="22" color="00000000"/>
+		<OnHover>
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="22" sizeY="22" color="0c0b0b90"/>
+		</OnHover>
+		<OnClick>
+			<RenderObject2D texture="data/textures/gui/square.tga" sizeX="22" sizeY="22" color="0c0b0b90"/>
+			<Action type="PlaySound" target="gui_customize_equip"/>
+			<Action type="Callback" target="#dk2ml_lo_lock_template"/>
+		</OnClick>
+		<StaticImage name="#dk2ml_lo_lock_off">
+			<RenderObject2D texture="data/textures/gui/dk2ml_lo_lock_open.tga" scaleX="0.4" scaleY="0.4" color="f0e3cc66"/>
+		</StaticImage>
+		<StaticImage name="#dk2ml_lo_lock_on" hidden="true">
+			<RenderObject2D texture="data/textures/gui/dk2ml_lo_lock_closed.tga" scaleX="0.5" scaleY="0.5"/>
+		</StaticImage>
+	</Button>
+</GUIItems>

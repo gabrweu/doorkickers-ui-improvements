@@ -5,7 +5,7 @@
 -->
 <Mod
 	title="Era's UI Improvements"
-	description="A better trooper Customization screen: pick weapons and gear for every slot (including Trooper Toolbox slots) from a compact grid of icons grouped by type, hide slots the trooper has nothing for, choose any portrait from a grid, see breaching gear (lockpick, crowbar, halligan) in the trooper hover tooltip, and a themed mouse cursor. Requires the DK2 native mod loader."
+	description="A better trooper Customization screen: pick weapons and gear for every slot (including Trooper Toolbox slots) from a compact grid of icons grouped by type, hide slots the trooper has nothing for, choose any portrait from a grid, see breaching gear (lockpick, crowbar, halligan) in the trooper hover tooltip, see which squads completed each campaign on the campaign selection screen, and a themed mouse cursor. Requires the Door Kickers 2 Native Mod Loader."
 	author="Gabriel Bunselmeyer"
 	tags="UI"
 	changeNotes=""
